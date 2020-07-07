@@ -123,5 +123,7 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 func main() {
 	go manager.start()
 	http.HandleFunc("/ws", wsPage)
+	//TODO: add api handler to initiate a group or personal chat room and send back a generated id
+	//TODO: use the sent id in a websocket handler to enable users to connect
 	http.ListenAndServe(":12345", nil)
 }
