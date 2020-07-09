@@ -156,7 +156,10 @@ func wsHandler(c *gin.Context) {
 func main() {
 	r := gin.Default()
 	go manager.start()
-
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "9900"
+	}
 	r.GET("/ws/:id", wsHandler)
-	r.Run(os.Getenv("PORT"))
+	r.Run(port)
 }
