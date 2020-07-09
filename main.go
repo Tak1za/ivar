@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -157,5 +158,5 @@ func main() {
 	go manager.start()
 
 	r.GET("/ws/:id", wsHandler)
-	r.Run(":8080")
+	r.Run(os.Getenv("PORT"))
 }
