@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -156,10 +155,7 @@ func wsHandler(c *gin.Context) {
 func main() {
 	r := gin.Default()
 	go manager.start()
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "9900"
-	}
+
 	r.GET("/ws/:id", wsHandler)
-	r.Run(port)
+	r.Run(":8080")
 }
