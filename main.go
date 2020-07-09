@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 )
@@ -34,18 +36,25 @@ var manager = ClientManager{
 	clients:    make(map[*Client]bool),
 }
 
+var wsUpgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
 func (manager *ClientManager) start() {
 	for {
 		select {
 		case conn := <-manager.register:
 			manager.clients[conn] = true
 			jsonMessage, _ := json.Marshal(&Message{Content: "Someone has connected"})
+			log.Println("Someone has connected")
 			manager.send(jsonMessage, conn)
 		case conn := <-manager.unregister:
 			if _, ok := manager.clients[conn]; ok {
 				close(conn.send)
 				delete(manager.clients, conn)
 				jsonMessage, _ := json.Marshal(&Message{Content: "Someone has disconnected"})
+				log.Println("Someone has disconnected")
 				manager.send(jsonMessage, conn)
 			}
 		case message := <-manager.broadcast:
@@ -105,10 +114,18 @@ func (c *Client) write() {
 	}
 }
 
-func wsPage(res http.ResponseWriter, req *http.Request) {
-	conn, err := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}).Upgrade(res, req, nil)
+func checkOrigin(r *http.Request) func(r *http.Request) bool {
+	return func(r *http.Request) bool {
+		return true
+	}
+}
+
+func wsHandler(c *gin.Context) {
+	wsUpgrader.CheckOrigin = checkOrigin(c.Request)
+	wsUpgrader.EnableCompression = true
+	conn, err := wsUpgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		http.NotFound(res, req)
+		log.Printf("Failed to set websocket upgrade: %+v", err)
 		return
 	}
 
@@ -121,9 +138,11 @@ func wsPage(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	r := gin.Default()
 	go manager.start()
-	http.HandleFunc("/ws", wsPage)
+
+	r.GET("/ws", wsHandler)
 	//TODO: add api handler to initiate a group or personal chat room and send back a generated id
 	//TODO: use the sent id in a websocket handler to enable users to connect
-	http.ListenAndServe(":12345", nil)
+	r.Run("localhost:8080")
 }
