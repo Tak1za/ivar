@@ -157,8 +157,6 @@ func main() {
 	r := gin.Default()
 	go manager.start()
 
-	port := os.Getenv("PORT")
-
 	r.GET("/ws/:id", wsHandler)
-	r.Run(port)
+	r.Run(":" + os.Getenv("PORT"))
 }
