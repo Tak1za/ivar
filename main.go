@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"os"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -156,6 +157,8 @@ func main() {
 	r := gin.Default()
 	go manager.start()
 
+	port := os.Getenv("PORT")
+
 	r.GET("/ws/:id", wsHandler)
-	r.Run(":8080")
+	r.Run(port)
 }
