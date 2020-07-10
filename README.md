@@ -1,5 +1,5 @@
 # ivar
-**This is a repository for a server synced, multi-device chat application**
+**This is a repository for the backend of a server synced, multi-device chat application**
 
 Functionality:
 1. Users can create groups which can contain 2 to 50 members.
