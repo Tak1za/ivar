@@ -15,7 +15,7 @@ func NewSubscriber(socketConn *websocket.Conn, groupId string) *MyClient {
 	myClient := &models.Client{
 		ID:     uuid.NewV4().String(),
 		Socket: socketConn,
-		Send:   make(chan []byte),
+		Send:   make(chan []byte, 1),
 		Group:  groupId,
 	}
 
