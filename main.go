@@ -1,6 +1,7 @@
 package main
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"log"
 	"net/http"
 	"os"
@@ -29,13 +30,18 @@ func main() {
 	}
 
 	r.GET("/ws/:id", wsHandler)
-	r.Run(":" + port)
+	r.POST("/create", createGroupHandler)
+	_ = r.Run(":" + port)
 }
 
 func checkOrigin() func(r *http.Request) bool {
 	return func(r *http.Request) bool {
 		return true
 	}
+}
+
+func createGroupHandler(context *gin.Context){
+	context.JSON(http.StatusOK, uuid.NewV4().String())
 }
 
 func wsHandler(context *gin.Context) {
